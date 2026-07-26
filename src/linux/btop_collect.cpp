@@ -401,8 +401,10 @@ namespace Shared {
 			Gpu::Asysfs::init(); //? self-skips when rocm-smi already enumerated devices
 		}
 
-		if (shown_gpus.contains("intel")) {
+			if (shown_gpus.contains("intel")) {
+		#if defined(__x86_64__)
 			Gpu::Intel::init();
+		#endif
 		}
 
 		if (not Gpu::gpu_names.empty()) {
@@ -1910,6 +1912,7 @@ namespace Gpu {
 		}
 	}
 
+	#if defined(__x86_64__)
 	namespace Intel {
 		bool init() {
 			if (initialized) return false;
@@ -1966,7 +1969,6 @@ namespace Gpu {
 
 			initialized = true;
 			Intel::collect<1>(gpus.data() + Nvml::device_count + Rsmi::device_count + Asysfs::device_count);
-
 			return true;
 		}
 
@@ -2028,6 +2030,7 @@ namespace Gpu {
 			return true;
 		}
 	}
+	#endif
 
 	namespace Asysfs {
 		//? Read a sysfs node containing a single integer; return fallback on missing/parse error.
@@ -2224,7 +2227,9 @@ namespace Gpu {
 		Nvml::collect<0>(gpus.data()); // raw pointer to vector data, size == Nvml::device_count
 		Rsmi::collect<0>(gpus.data() + Nvml::device_count); // size = Rsmi::device_count
 		Asysfs::collect<0>(gpus.data() + Nvml::device_count + Rsmi::device_count); // size = Asysfs::device_count
+	#if defined(__x86_64__)
 		Intel::collect<0>(gpus.data() + Nvml::device_count + Rsmi::device_count + Asysfs::device_count); // size = Intel::device_count
+	#endif
 
 		//* Calculate average usage
 		long long avg = 0;
