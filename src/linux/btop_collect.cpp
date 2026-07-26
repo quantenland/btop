@@ -1259,6 +1259,9 @@ namespace Gpu {
 			const array libNvAlts = {
 				"libnvidia-ml.so",
 				"libnvidia-ml.so.1",
+				"libnvidia-ml.so.535", // common on Jetson/Orin/DGX
+				"/usr/lib/aarch64-linux-gnu/libnvidia-ml.so.1",
+				"/usr/lib/aarch64-linux-gnu/libnvidia-ml.so",
 			};
 
 			for (const auto& l : libNvAlts) {

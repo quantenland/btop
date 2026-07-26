@@ -866,11 +866,22 @@ namespace Cpu {
 			const bool freq_range = false;
 		#endif
 
-			//? Cpu clock and cpu meter
-			if (Config::getB("show_cpu_freq") and not cpuHz.empty())
-				out += Mv::to(b_y, b_x + b_width - (freq_range ? 20 : 10)) + Fx::ub + Theme::c("div_line")
-					+ Symbols::h_line * ((freq_range ? 17 : 7) - cpuHz.size())
-					+ Symbols::title_left + Fx::b + Theme::c("title") + cpuHz + Fx::ub + Theme::c("div_line") + Symbols::title_right;
+			//? Cpu clock and gpu clock
+			if (Config::getB("show_cpu_freq") and not cpuHz.empty()) {
+				string freq_display = cpuHz;
+			#if defined(GPU_SUPPORT)
+				if (not gpus.empty() and gpus[0].supported_functions.gpu_clock and gpus[0].gpu_clock_speed > 0) {
+					freq_display += " | " + to_string(gpus[0].gpu_clock_speed) + " MHz";
+				}
+			#endif
+				int display_len = freq_display.size();
+				int allocated = display_len + 3; // content + title markers + right margin
+				if (not freq_range) allocated = max(allocated, 10);
+				else allocated = max(allocated, 20);
+				out += Mv::to(b_y, b_x + b_width - allocated) + Fx::ub + Theme::c("div_line")
+					+ Symbols::h_line * (allocated - 3 - display_len)
+					+ Symbols::title_left + Fx::b + Theme::c("title") + freq_display + Fx::ub + Theme::c("div_line") + Symbols::title_right;
+			}
 
 			out += Mv::to(b_y + 1, b_x + 1) + Theme::c("main_fg") + Fx::b + "CPU " + cpu_meter(safeVal(cpu.cpu_percent, "total"s).back())
 				+ Theme::g("cpu").at(clamp(safeVal(cpu.cpu_percent, "total"s).back(), 0ll, 100ll)) + rjust(to_string(safeVal(cpu.cpu_percent, "total"s).back()), 4) + Theme::c("main_fg") + '%';
